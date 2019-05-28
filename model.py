@@ -20,17 +20,24 @@ class MoneyAgent(Agent):
         new_position = self.random.choice(possible_steps)
         self.model.grid.move_agent(self, new_position)
 
-    def give_money(self):
+    def exchange_money(self):
         cellmates = self.model.grid.get_cell_list_contents([self.pos])
         if len(cellmates) > 1:
             other = self.random.choice(cellmates)
-            other.wealth += 1
-            self.wealth -= 1
+            other.wealth += self.wealth * 0.1
+            self.wealth += other.wealth * 0.1
 
     def step(self):
         self.move()
+        self.wealth -= 0.1
         if self.wealth > 0:
-            self.give_money()
+            self.exchange_money()
+        else:
+            self.wealth = 0
+        self.get_rewarded()
+
+    def get_rewarded(self):
+        pass
 
 
 def compute_gini(model):
@@ -39,6 +46,9 @@ def compute_gini(model):
     N = model.num_agents
     B = sum(xi * (N - i) for i, xi in enumerate(x)) / (N * sum(x))
     return (1 + (1 / N) - 2 * B)
+
+def average_wealth(model):
+    return sum([agent.wealth for agent in model.schedule.agents])
 
 
 class MoneyModel(Model):
@@ -60,7 +70,7 @@ class MoneyModel(Model):
             self.grid.place_agent(a, (x, y))
 
         self.datacollector = DataCollector(
-            model_reporters={"Gini": compute_gini},  # A function to call
+            model_reporters={"Gini": compute_gini, "Wealth": average_wealth},  # A function to call
             agent_reporters={"Wealth": "wealth"})  # An agent attribute
 
     def step(self):

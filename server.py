@@ -15,20 +15,16 @@ def agent_portrayal(agent):
                  "Filled": "true",
                  "Layer": 0,
                  "r": 0.8}
-    if agent.wealth > 0:
-        portrayal["Color"] = "red"
-        portrayal["Layer"] = 0
-    else:
-        portrayal["Color"] = "grey"
-        portrayal["Layer"] = 1
-        portrayal["r"] = 0.4
+    portrayal["r"] = 0.1 * (agent.wealth ** 0.5)
     return portrayal
 
 
 grid = CanvasGrid(agent_portrayal, CELLS, CELLS, 300, 300)
 
 chart = ChartModule([{"Label": "Gini",
-                      "Color": "Black"}],
+                      "Color": "Black"},
+                     {"Label": "Wealth",
+                      "Color": "Red"}],
                     data_collector_name='datacollector')
 
 n_slider = UserSettableParameter('slider', "Number of Agents", 100, 2, 1000, 1)
